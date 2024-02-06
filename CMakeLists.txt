@@ -10,4 +10,10 @@ add_library(xi SHARED
         xi_log.cpp
         xi_log.h
         xi_fun.cpp
-        xi_fun.h)
+        xi_fun.h
+        xi_cfg.cpp
+        xi_cfg.h
+        xi_guard.cpp
+        xi_guard.h)
+
+set_target_properties (xi PROPERTIES PREFIX "" OUTPUT_NAME "XInput9_1_0" SUFFIX ".dll")
