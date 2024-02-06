@@ -1,7 +1,7 @@
 #pragma once
 #include "windows.h"
 
-void xi_begin();
+void xi_begin(HINSTANCE hinstance);
 void xi_end();
 
 void xi_call_enable(WINBOOL enable);

@@ -1,11 +1,10 @@
 #include "windows.h"
 #include "xinput.h"
+#include "xi_cfg.h"
 #include "xi_log.h"
 #include "xi_xi.h"
 
 enum XI_STAGE { OFF, ON_STAGE_0, ON_STAGE_1, ON_STAGE_2, ON_STAGE_3 };
-const DWORD TCK_STAGE_1 = 1000;
-const DWORD TCK_STAGE_2 = 500;
 
 enum XI_STAGE xi_fun_stage = OFF;
 DWORD xi_fun_pn_delta = 0;
@@ -35,7 +34,7 @@ void xi_fun_alter(PXINPUT_STATE lpState) {
         }
         if (xi_fun_stage == ON_STAGE_1) {
             DWORD tck_delta = tck_now - xi_fun_tck_stage_1;
-            if (tck_delta >= TCK_STAGE_1) {
+            if (tck_delta >= CFG_TCK_STAGE_1) {
                 xi_fun_stage = ON_STAGE_2;
                 xi_fun_tck_stage_2 = tck_now;
                 xi_fun_pn_delta = xi_fun_pn_delta + 1;
@@ -43,7 +42,7 @@ void xi_fun_alter(PXINPUT_STATE lpState) {
         }
         if (xi_fun_stage == ON_STAGE_2) {
             DWORD tck_delta = tck_now - xi_fun_tck_stage_2;
-            if (tck_delta < TCK_STAGE_2) {
+            if (tck_delta < CFG_TCK_STAGE_2) {
                 lpState->Gamepad.wButtons = lpState->Gamepad.wButtons | XINPUT_GAMEPAD_LEFT_THUMB;
             } else {
                 xi_fun_stage = ON_STAGE_1;

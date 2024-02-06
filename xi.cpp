@@ -1,31 +1,9 @@
 #include "windows.h"
+#include "xi_cfg.h"
 #include "xi_log.h"
 #include "xi_xi.h"
-#include  "xi_fun.h"
-
-extern "C" __declspec( dllexport ) BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved) {
-    //int mn_len = GetModuleFileNameA(hinstDLL, NULL, 0);
-    //char name[mn_len];
-    //GetModuleFileNameA(hinstDLL, (LPSTR) name, mn_len);
-
-    switch (fdwReason) {
-        case DLL_PROCESS_ATTACH:
-            log_begin();
-            xi_begin();
-            break;
-        case DLL_THREAD_ATTACH:
-            break;
-        case DLL_THREAD_DETACH:
-            break;
-        case DLL_PROCESS_DETACH:
-            xi_end();
-            log_end();
-            break;
-        default:
-            break;
-    }
-    return TRUE;
-}
+#include "xi_fun.h"
+#include "xi_guard.h"
 
 extern "C" __declspec( dllexport ) void WINAPI XInputEnable(WINBOOL enable) {
     xi_call_enable(enable);
@@ -61,4 +39,28 @@ extern "C" __declspec( dllexport ) DWORD WINAPI XInputGetStateEx(DWORD dwIndex, 
 
 extern "C" __declspec( dllexport ) DWORD WINAPI XInputGetAudioDeviceIds(DWORD dwIndex, LPWSTR lpRenderDeviceId, UINT* lpRenderCount, LPWSTR lpCaptureDeviceId, UINT* lpCaptureCount) {
     return xi_call_get_audio_device_ids(dwIndex, lpRenderDeviceId, lpRenderCount, lpCaptureDeviceId, lpCaptureCount);
+}
+
+extern "C" __declspec( dllexport ) BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved) {
+    switch (fdwReason) {
+        case DLL_PROCESS_ATTACH:
+            cfg_begin();
+            log_begin();
+            xi_begin(hinstDLL);
+            guard_begin((LPVOID) XInputGetState, (LPVOID) XInputGetStateEx);
+            break;
+        case DLL_THREAD_ATTACH:
+            break;
+        case DLL_THREAD_DETACH:
+            break;
+        case DLL_PROCESS_DETACH:
+            guard_end();
+            xi_end();
+            log_end();
+            cfg_end();
+            break;
+        default:
+            break;
+    }
+    return TRUE;
 }

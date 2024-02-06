@@ -1,5 +1,9 @@
+#include <string>
 #include "windows.h"
+#include <shfolder.h>
+#include <shlobj.h>
 #include "xinput.h"
+#include "xi_cfg.h"
 #include "xi_log.h"
 
 typedef void WINAPI (*XI_ENABLE)(WINBOOL);
@@ -60,9 +64,23 @@ DWORD WINAPI xi_stub_get_audio_device_ids(DWORD dwIndex, LPWSTR lpRenderDeviceId
     return ERROR_DEVICE_NOT_CONNECTED;
 }
 
-void xi_begin() {
+void xi_begin(HINSTANCE hinstance) {
+    TCHAR pmn[MAX_PATH];
+    TCHAR pln[MAX_PATH];
+
+    GetModuleFileName(hinstance, pmn, MAX_PATH);
+    log_log_fmt("Module name is %s", pmn);
+    if (FAILED(SHGetFolderPath(NULL, CSIDL_SYSTEM, NULL, SHGFP_TYPE_CURRENT, pln))) {
+        strcpy(pln, TEXT("C:\\WINDOWS\\SYSTEM32"));
+    }
+    log_log_fmt("System folder is %s", pln);
+
+    TCHAR* pxn = strrchr(pmn, '\\');
+    strcat(pln, pxn);
+    log_log_fmt("Library name is %s", pln);
+
     if (xi_count == 0) {
-        xi_library = LoadLibrary("C:\\WINDOWS\\SYSTEM32\\XINPUT9_1_0.DLL");
+        xi_library = LoadLibrary(pln);
         if (xi_library != NULL) {
             log_log("Library loaded");
             //
@@ -149,6 +167,8 @@ void xi_begin() {
             xi_get_state_ex = xi_stub_get_state_ex;
             xi_get_audio_device_ids = xi_stub_get_audio_device_ids;
         }
+        log_log_fmt("Delay 1 is %ul", CFG_TCK_STAGE_1);
+        log_log_fmt("Delay 2 is %ul", CFG_TCK_STAGE_2);
     }
     xi_count++;
 }

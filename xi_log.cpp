@@ -1,6 +1,7 @@
 #include <cstdio>
 #include <ctime>
 #include "windows.h"
+#include "xi_cfg.h"
 
 int log_count = 0;
 
@@ -8,7 +9,9 @@ HANDLE log_f = INVALID_HANDLE_VALUE;
 
 void log_begin() {
     if (log_count == 0) {
-        //log_f = CreateFile("xi.log", GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+        if (CFG_LOG) {
+            log_f = CreateFile("xi.log", GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL,NULL);
+        }
     }
     log_count++;
 }
